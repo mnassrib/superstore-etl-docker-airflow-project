@@ -1,0 +1,10 @@
+# Ignore environment variables file
+.env
+
+# Ignore log files
+airflow/logs/
+
+# Ignore Python cache files
+airflow/dags/__pycache__/
+
+notebooks/.ipynb_checkpoints

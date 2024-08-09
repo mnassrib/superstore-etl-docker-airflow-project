@@ -1,0 +1,126 @@
+services:
+  mysql:
+    image: mysql:5.7
+    container_name: mysql
+    command: --default-authentication-plugin=mysql_native_password --explicit_defaults_for_timestamp=1
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./mysql/my.cnf:/etc/mysql/my.cnf  # Monte le fichier my.cnf
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+    networks:
+      - airflow_network
+
+  mysql-setup:
+      image: mysql:5.7
+      container_name: mysql-setup
+      command: >
+        bash -c "
+        mysql -h mysql -u root -p${MYSQL_ROOT_PASSWORD} -e \"
+          CREATE DATABASE IF NOT EXISTS ${SUPERSTORE_MYSQL_DATABASE};
+          CREATE USER IF NOT EXISTS '${MYSQL_USER}'@'%' IDENTIFIED BY '${MYSQL_PASSWORD}';
+          GRANT ALL PRIVILEGES ON ${SUPERSTORE_MYSQL_DATABASE}.* TO '${MYSQL_USER}'@'%';
+          FLUSH PRIVILEGES;\"
+        "
+      environment:
+        MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+        SUPERSTORE_MYSQL_DATABASE: ${SUPERSTORE_MYSQL_DATABASE}
+        MYSQL_USER: ${MYSQL_USER}
+        MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      networks:
+        - airflow_network
+      depends_on:
+        mysql:
+          condition: service_healthy
+      restart: "no"
+
+  adminer:
+    image: adminer
+    container_name: adminer
+    ports:
+      - "8081:8080"
+    depends_on:
+      - mysql
+    environment:
+      ADMINER_DEFAULT_SERVER: mysql
+    networks:
+      - airflow_network
+
+  jupyter:
+    build: ./jupyter
+    image: jupyter
+    container_name: jupyter
+    volumes:
+      - ./notebooks:/home/jovyan/work # Montage des notebooks Jupyter
+    ports:
+      - "8887:8888" # Exposition du port Jupyter
+    environment:
+      MYSQL_HOST: ${MYSQL_HOST}
+      SUPERSTORE_MYSQL_DATABASE: ${SUPERSTORE_MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      JUPYTER_ENABLE_LAB: "yes"
+    command: start-notebook.sh --NotebookApp.token=''
+    networks:
+      - airflow_network
+
+  airflow-init:
+    image: apache/airflow:2.3.0
+    container_name: airflow-init
+    environment:
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: mysql://${MYSQL_USER}:${MYSQL_PASSWORD}@mysql:3306/${MYSQL_DATABASE}
+      AIRFLOW__CORE__LOAD_EXAMPLES: 'False'
+    entrypoint: /bin/bash
+    command: -c "sleep 30 && airflow db upgrade && airflow users create --username admin --password admin --firstname Air --lastname Flow --role Admin --email admin@example.com"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - airflow_network
+    restart: "no"
+
+  airflow:
+    build: ./airflow
+    image: airflow
+    container_name: airflow
+    environment:
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: mysql://${MYSQL_USER}:${MYSQL_PASSWORD}@mysql:3306/${MYSQL_DATABASE}
+      AIRFLOW__CORE__LOAD_EXAMPLES: 'False'
+      MYSQL_HOST: ${MYSQL_HOST}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      SUPERSTORE_MYSQL_DATABASE: ${SUPERSTORE_MYSQL_DATABASE}
+      DATA_FILE_PATH: ${DATA_FILE_PATH}
+    volumes:
+      - ./airflow/dags:/opt/airflow/dags
+      - ./airflow/logs:/opt/airflow/logs
+      - ./airflow/plugins:/opt/airflow/plugins
+      - .${DATA_FILE_PATH}:${DATA_FILE_PATH}
+    ports:
+      - "8080:8080"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      airflow-init:
+        condition: service_completed_successfully
+    command: >
+      bash -c "airflow scheduler & airflow webserver"
+    networks:
+      - airflow_network
+
+volumes:
+  mysql_data: # Définition du volume pour le stockage persistant des données MySQL
+
+networks:
+  airflow_network:
