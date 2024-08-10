@@ -81,19 +81,76 @@ Le fichier `.env` contient des variables d'environnement qui sont utilisées pou
 
 ## Modélisation ERD
 
-La base de données MySQL est structurée en plusieurs tables, représentant les différentes entités du projet. Le diagramme ERD suivant montre la relation entre ces entités :
+La base de données MySQL pour ce projet est structurée selon un schéma relationnel classique, où les données sont organisées en plusieurs tables interconnectées. Chaque table représente une entité clé du modèle de données SuperStore, avec des relations bien définies entre elles via des clés primaires et étrangères. Le diagramme ERD ci-dessous illustre la structure et les relations entre ces tables :
 
 ![ERD](erd.png)
 
+### Détails des tables
 
-### Tables principales
+#### 1. **customers** (Clients)
+- **Description** : Cette table stocke les informations sur les clients.
+- **Colonnes** :
+  - `customer_id` (PRIMARY KEY) : Identifiant unique pour chaque client.
+  - `customer_name` : Nom du client.
+  - `segment` : Segment de marché auquel appartient le client (par exemple, "Consommateur", "Entreprise").
+  
+#### 2. **products** (Produits)
+- **Description** : Cette table contient des informations sur les produits vendus par le SuperStore.
+- **Colonnes** :
+  - `product_id` (PRIMARY KEY) : Identifiant unique pour chaque produit.
+  - `product_name` : Nom du produit.
+  - `category` : Catégorie du produit (par exemple, "Mobilier", "Fournitures de bureau").
+  - `sub_category` : Sous-catégorie du produit (par exemple, "Chaises", "Accessoires de bureau").
+  
+#### 3. **sales_reps** (Représentants des ventes)
+- **Description** : Cette table garde une trace des représentants des ventes et de leurs équipes.
+- **Colonnes** :
+  - `sales_rep` (PRIMARY KEY) : Identifiant unique ou nom du représentant commercial.
+  - `sales_team` : Nom de l'équipe de vente à laquelle appartient le représentant.
+  - `sales_team_manager` : Nom du manager de l'équipe de vente.
+  
+#### 4. **locations** (Emplacements)
+- **Description** : Cette table stocke les informations relatives aux emplacements (villes, états) où les ventes ont lieu.
+- **Colonnes** :
+  - `location_id` (PRIMARY KEY) : Identifiant unique pour chaque emplacement (peut être une combinaison du code postal et de la ville).
+  - `city` : Nom de la ville.
+  - `state` : État ou région.
+  - `postal_code` : Code postal.
+  - `region` : Région géographique (par exemple, "Nord", "Sud").
 
-- **customers** : Informations sur les clients (ID, nom, segment).
-- **products** : Informations sur les produits (ID, nom, catégorie, sous-catégorie).
-- **sales_reps** : Informations sur les représentants commerciaux (ID, équipe, manager).
-- **locations** : Détails des emplacements (ID, ville, état, code postal, région).
-- **orders** : Informations sur les commandes (ID, date de commande, date d'expédition, mode d'expédition).
-- **order_details** : Détails de chaque commande (ID, produit, client, représentant commercial, emplacement, ventes, quantité, remise, profit).
+#### 5. **orders** (Commandes)
+- **Description** : Cette table contient des informations de haut niveau sur les commandes passées par les clients.
+- **Colonnes** :
+  - `order_id` (PRIMARY KEY) : Identifiant unique pour chaque commande.
+  - `order_date` : Date à laquelle la commande a été passée.
+  - `ship_date` : Date d'expédition de la commande.
+  - `ship_mode` : Mode d'expédition utilisé (par exemple, "Classe standard", "Seconde classe").
+
+#### 6. **order_details** (Détails des commandes)
+- **Description** : Cette table enregistre les détails spécifiques pour chaque commande, y compris les produits commandés, les quantités, et les ventes.
+- **Colonnes** :
+  - `order_detail_id` (PRIMARY KEY, AUTO_INCREMENT) : Identifiant unique pour chaque enregistrement de détail de commande.
+  - `order_id` (FOREIGN KEY) : Fait référence à `order_id` dans la table `orders`.
+  - `product_id` (FOREIGN KEY) : Fait référence à `product_id` dans la table `products`.
+  - `customer_id` (FOREIGN KEY) : Fait référence à `customer_id` dans la table `customers`.
+  - `sales_rep` (FOREIGN KEY) : Fait référence à `sales_rep` dans la table `sales_reps`.
+  - `location_id` (FOREIGN KEY) : Fait référence à `location_id` dans la table `locations`.
+  - `sales` : Montant des ventes pour cet enregistrement.
+  - `quantity` : Quantité de produit commandée.
+  - `discount` : Remise appliquée à cet enregistrement.
+  - `profit` : Bénéfice réalisé sur cet enregistrement.
+
+### Relations entre les tables
+
+Les relations entre les tables sont établies via des clés étrangères (`FOREIGN KEY`), assurant l'intégrité des données à travers la base de données :
+
+- **orders** ↔ **order_details** : La table `orders` est liée à `order_details` via la clé primaire `order_id`, permettant de regrouper tous les détails associés à une commande spécifique.
+- **products** ↔ **order_details** : La table `products` est liée à `order_details` via la clé primaire `product_id`, associant chaque produit à ses détails de commande respectifs.
+- **customers** ↔ **order_details** : La table `customers` est liée à `order_details` via la clé primaire `customer_id`, permettant de relier chaque détail de commande à un client spécifique.
+- **sales_reps** ↔ **order_details** : La table `sales_reps` est liée à `order_details` via la clé primaire `sales_rep`, associant chaque vente à un représentant commercial.
+- **locations** ↔ **order_details** : La table `locations` est liée à `order_details` via la clé primaire `location_id`, liant chaque commande à un emplacement spécifique.
+
+Ces relations permettent de structurer les données de manière à garantir leur cohérence et à faciliter les requêtes complexes pour des analyses approfondies.
 
 ## Pipeline ETL
 
