@@ -151,10 +151,10 @@ def create_tables(**kwargs):
 def extract():
     data_file_path = os.getenv('DATA_FILE_PATH')
     df = pd.read_csv(data_file_path)
-    df.to_csv('/tmp/superstore_data_clean.csv', index=False)
+    df.to_csv('/tmp/superstore_data_raw.csv', index=False)
 
 def transform():
-    df = pd.read_csv('/tmp/superstore_data_clean.csv')
+    df = pd.read_csv('/tmp/superstore_data_raw.csv')
 
     # 1. Gérer les valeurs manquantes
     # Supprimer les lignes avec des valeurs manquantes
@@ -178,7 +178,7 @@ def transform():
     df['quantity'] = df['quantity'].abs()
 
     # Enregistrer les données nettoyées
-    df.to_csv('/tmp/superstore_data_transformed.csv', index=False)
+    df.to_csv('/tmp/superstore_data_clean.csv', index=False)
 
 def load():
     # Connexion à la base de données
@@ -191,7 +191,7 @@ def load():
     
     cursor = conn.cursor()
     
-    df = pd.read_csv('/tmp/superstore_data_transformed.csv')
+    df = pd.read_csv('/tmp/superstore_data_clean.csv')
     
     # Insérer les données dans les tables respectives
     for index, row in df.iterrows():

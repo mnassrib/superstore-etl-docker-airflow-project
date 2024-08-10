@@ -154,12 +154,24 @@ Ces relations permettent de structurer les données de manière à garantir leur
 
 ## Pipeline ETL
 
-Le pipeline ETL est géré par Airflow et est défini dans le fichier `superstore_etl.py`. Le processus complet est organisé en quatre tâches principales :
+Le pipeline ETL est géré par Apache Airflow et est défini dans le fichier `superstore_etl.py`. Le processus complet est organisé en quatre tâches principales :
 
-1. **create_tables** : Cette tâche crée les tables nécessaires dans la base de données MySQL.
-2. **extract** : Cette tâche extrait les données brutes du fichier CSV `SuperStoreRawData.csv` et les enregistre dans un fichier temporaire.
-3. **transform** : Cette tâche nettoie et transforme les données extraites, en supprimant les doublons, en gérant les valeurs manquantes, et en normalisant les formats de données.
-4. **load** : Cette tâche charge les données transformées dans les tables MySQL.
+1. **create_tables** : Cette tâche crée les tables nécessaires dans la base de données MySQL conformément à la modélisation ERD (Entity-Relationship Diagram) définie pour le projet. Chaque table est créée avec des colonnes spécifiques, des clés primaires et des clés étrangères pour garantir l'intégrité et la structure des données. La création des tables suit strictement le schéma relationnel, en veillant à établir les relations entre les entités telles que `customers`, `products`, `orders`, `order_details`, etc.
+
+2. **extract** : Cette tâche extrait les données brutes du fichier CSV `SuperStoreRawData.csv` et les enregistre dans un fichier temporaire sur le système de fichiers local. Ces données brutes constituent la matière première pour les étapes de transformation suivantes.
+
+3. **transform** : Cette tâche nettoie et transforme les données extraites pour qu'elles soient prêtes à être chargées dans la base de données MySQL. Les étapes de transformation incluent :
+   - **Gestion des valeurs manquantes** : Les lignes contenant des valeurs nulles ou manquantes sont supprimées pour garantir la qualité des données.
+   - **Suppression des duplicatas** : Les doublons sont supprimés afin d'éviter toute redondance dans la base de données.
+   - **Traitement des valeurs aberrantes** : Les valeurs de la colonne `sales` qui sont considérées comme aberrantes (trop faibles ou trop élevées) par rapport à l'écart interquartile (IQR) sont filtrées.
+   - **Uniformisation des formats de données** : Les dates sont normalisées au format `YYYY-MM-DD` pour assurer la cohérence dans la base de données.
+   - **Correction des valeurs incorrectes** : Les valeurs négatives dans la colonne `quantity` sont corrigées en utilisant la valeur absolue.
+   - Les données transformées sont ensuite enregistrées dans un fichier temporaire pour être prêtes à être chargées.
+
+4. **load** : Cette tâche charge les données transformées dans les tables MySQL. Pour chaque ligne du fichier de données transformées :
+   - Les données sont insérées dans les tables correspondantes (`customers`, `products`, `sales_reps`, `locations`, `orders`, `order_details`).
+   - Les opérations `INSERT` utilisent la clause `ON DUPLICATE KEY UPDATE` pour s'assurer que les enregistrements existants sont mis à jour sans créer de doublons. Cela garantit que les dernières informations sont correctement enregistrées dans la base de données.
+   - Les relations définies par les clés étrangères sont respectées lors de l'insertion des données, assurant ainsi l'intégrité référentielle entre les tables.
 
 ### Utilisation du pipeline ETL
 
