@@ -23,6 +23,7 @@ superstore-etl-docker-airflow-project/
 │    └── SuperStoreRawData.csv
 ├── jupyter/
 │    └── Dockerfile
+│    └── requirements.txt
 ├── mysql/
 │    ├── init.sql
 │    └── my.cnf
@@ -44,6 +45,7 @@ superstore-etl-docker-airflow-project/
   - **SuperStoreRawData.csv** : Fichier de données brutes à traiter par le pipeline ETL.
 - **jupyter/** :
   - **Dockerfile** : Fichier Docker pour créer une image Jupyter personnalisée capable de se connecter à la base de données MySQL.
+  - **requirements.txt** : Fichier contenant les packages Python nécessaires à Jupyter, comme `mysql-connector-python`, `SQLAlchemy`, ...
 - **mysql/** :
   - **init.sql** : Script SQL pour initialiser la base de données (non utilisé directement dans le pipeline mais disponible si nécessaire).
   - **my.cnf** : Fichier de configuration MySQL personnalisé.
@@ -52,7 +54,22 @@ superstore-etl-docker-airflow-project/
 
 ## Fichier `.env`
 
-Le fichier `.env` contient des variables d'environnement qui sont utilisées pour configurer les services MySQL et les chemins de fichiers dans votre projet. Voici les principales variables définies :
+Créez un fichier `.env` à la racine du projet avec le contenu suivant comme exemple :
+
+```env
+# MySQL environment variables for Airflow
+MYSQL_ROOT_PASSWORD=rootpassword
+MYSQL_DATABASE=airflow_db
+MYSQL_HOST=mysql
+MYSQL_USER=airflow
+MYSQL_PASSWORD=123
+
+# MySQL environment variables for SuperStore
+SUPERSTORE_MYSQL_DATABASE=superstore
+DATA_FILE_PATH=/data/SuperStoreRawData.csv
+```
+
+Le fichier `.env` contient des variables d'environnement qui sont utilisées pour configurer les services MySQL et les chemins de fichiers dans votre projet. Voici les variables définies :
 
 - **MYSQL_ROOT_PASSWORD** : Mot de passe pour l'utilisateur root de MySQL.
 - **MYSQL_DATABASE** : Nom de la base de données utilisée par Airflow.
@@ -101,7 +118,7 @@ Pour exécuter le pipeline ETL, suivez ces étapes :
 2. **Accéder à l'interface Airflow** :
    - Airflow est accessible via votre navigateur à l'adresse `http://localhost:8080`.
    - Utilisez les identifiants par défaut (nom d'utilisateur : `admin`, mot de passe : `admin`) pour vous connecter.
-
+   
 3. **Accéder à Adminer** :
    - Adminer, un outil de gestion de base de données, est accessible via votre navigateur à l'adresse `http://localhost:8081`.
    - Utilisez les mêmes informations de connexion que celles définies dans le fichier `.env` pour accéder à votre base de données MySQL.

@@ -69,6 +69,9 @@ services:
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
       JUPYTER_ENABLE_LAB: "yes"
     command: start-notebook.sh --NotebookApp.token=''
+    depends_on:
+        mysql:
+          condition: service_healthy
     networks:
       - airflow_network
 

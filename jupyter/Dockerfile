@@ -1,7 +1,8 @@
 FROM jupyter/datascience-notebook:latest
 
 # Installer des packages supplémentaires si nécessaire
-RUN pip install mysql-connector-python pandas SQLAlchemy PyMySQL
+COPY requirements.txt /requirements.txt
+RUN pip install --no-cache-dir -r /requirements.txt
 
 # Exposer le port 8888 pour Jupyter
 EXPOSE 8888
