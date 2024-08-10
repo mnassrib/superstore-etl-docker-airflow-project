@@ -173,27 +173,72 @@ Le pipeline ETL est géré par Apache Airflow et est défini dans le fichier `su
    - Les opérations `INSERT` utilisent la clause `ON DUPLICATE KEY UPDATE` pour s'assurer que les enregistrements existants sont mis à jour sans créer de doublons. Cela garantit que les dernières informations sont correctement enregistrées dans la base de données.
    - Les relations définies par les clés étrangères sont respectées lors de l'insertion des données, assurant ainsi l'intégrité référentielle entre les tables.
 
-### Utilisation du pipeline ETL
+### Utilisation du Pipeline ETL
 
-Pour exécuter le pipeline ETL, suivez ces étapes :
+Pour utiliser le pipeline ETL, suivez ces étapes détaillées :
 
-1. **Démarrer les services** :
-   - Assurez-vous que Docker et Docker Compose sont installés sur votre machine.
-   - Lancez tous les services en exécutant la commande suivante dans le répertoire du projet :
+#### 1. **Cloner le projet**
+   - Commencez par cloner le dépôt du projet sur votre machine locale en utilisant Git :
+     ```bash
+     git clone https://github.com/mnassrib/superstore-etl-docker-airflow-project.git       
+     cd superstore-etl-docker-airflow-project
+     ```
+
+#### 2. **Configurer les variables d'environnement**
+   - Assurez-vous que le fichier `.env` est correctement configuré avec vos paramètres de base de données et autres variables d'environnement. Ce fichier définit les mots de passe MySQL, les noms de bases de données, et les chemins des fichiers nécessaires au bon fonctionnement des services.
+
+#### 3. **Démarrer les services avec Docker Compose**
+   - Ouvrez un terminal dans le répertoire du projet cloné.
+   - Pour démarrer tous les services (MySQL, Airflow, Jupyter, Adminer), exécutez la commande suivante :
      ```bash
      docker-compose up -d
      ```
+   - L'option `-d` lance les conteneurs en arrière-plan. Si vous souhaitez voir les logs en temps réel, vous pouvez omettre `-d`.
 
-2. **Accéder à l'interface Airflow** :
-   - Airflow est accessible via votre navigateur à l'adresse `http://localhost:8080`.
-   - Utilisez les identifiants par défaut (nom d'utilisateur : `admin`, mot de passe : `admin`) pour vous connecter.
-   
-3. **Accéder à Adminer** :
-   - Adminer, un outil de gestion de base de données, est accessible via votre navigateur à l'adresse `http://localhost:8081`.
-   - Utilisez les mêmes informations de connexion que celles définies dans le fichier `.env` pour accéder à votre base de données MySQL.
+   - **Vérifier les services** :
+     - Vous pouvez vérifier si les services fonctionnent correctement en utilisant :
+       ```bash
+       docker-compose ps
+       ```
+     - Cette commande vous montrera l'état de chaque conteneur.
 
-4. **Exécuter le DAG** :
-   - Activez le DAG `superstore_etl` dans l'interface Airflow pour commencer à traiter les données.
+   - **Arrêter les services** :
+     - Pour arrêter tous les services, utilisez :
+       ```bash
+       docker-compose down
+       ```
+
+#### 4. **Accéder à l'interface web d'Airflow**
+   - Airflow est l'outil principal pour gérer et visualiser le pipeline ETL. Pour y accéder, ouvrez votre navigateur et allez à l'adresse suivante :
+     ```
+     http://localhost:8080
+     ```
+   - **Connexion** :
+     - Utilisez les identifiants par défaut : nom d'utilisateur `admin` et mot de passe `admin`.
+     - Vous pouvez personnaliser ces informations dans le fichier `docker-compose.yml` ou dans l'interface web.
+
+   - **Explorer l'interface** :
+     - **Vue des DAGs** : Vous verrez une liste des DAGs (Graphes Acycliques Dirigés), y compris celui nommé `superstore_etl`. Cette interface vous permet de visualiser les DAGs disponibles et leur état actuel.
+     - **Activer le DAG** : Pour exécuter le pipeline ETL, activez le DAG `superstore_etl` en basculant l'interrupteur à côté de son nom.
+     - **Exécuter manuellement** : Vous pouvez déclencher une exécution manuelle du DAG en cliquant sur le bouton `Trigger DAG`.
+     - **Historique et logs** : Airflow permet de visualiser l'historique des exécutions des tâches, ainsi que les logs détaillés pour diagnostiquer les erreurs ou suivre le déroulement des opérations.
+
+#### 5. **Accéder à Adminer pour gérer la base de données**
+   - Adminer est un outil web qui vous permet de gérer la base de données MySQL. Il est particulièrement utile pour inspecter les tables, exécuter des requêtes SQL manuelles, et visualiser les données chargées.
+   - Pour accéder à Adminer, allez à l'adresse suivante dans votre navigateur :
+     ```
+     http://localhost:8081
+     ```
+   - **Connexion à la base de données** :
+     - Utilisez les informations de connexion définies dans le fichier `.env` :
+       - **Serveur** : `mysql`
+       - **Nom d'utilisateur** : `MYSQL_USER` (par défaut `airflow`)
+       - **Mot de passe** : `MYSQL_PASSWORD` (par défaut `123`)
+       - **Base de données** : `SUPERSTORE_MYSQL_DATABASE` (par défaut `superstore`)
+
+   - **Actions disponibles** :
+     - **Visualiser les tables** : Vous pouvez voir les tables créées (`customers`, `products`, `orders`, etc.) et explorer leurs contenus.
+     - **Exécuter des requêtes SQL** : Exécutez des requêtes personnalisées pour extraire des données spécifiques ou pour manipuler la base de données directement.
 
 ## Analyse des données avec Jupyter
 
@@ -202,11 +247,18 @@ Une fois les données chargées dans MySQL, vous pouvez les analyser en utilisan
 ### Utilisation de Jupyter
 
 1. **Accéder à Jupyter** :
-   - Jupyter est accessible via votre navigateur à l'adresse `http://localhost:8887`.
-   - Aucune authentification n'est nécessaire.
+    - Jupyter Notebook est disponible pour effectuer des analyses exploratoires sur les données une fois qu'elles sont chargées dans MySQL.
+    - Pour accéder à Jupyter, allez à l'adresse suivante :
+    ```
+    http://localhost:8887
+    ```
 
-2. **Exécuter le Notebook** :
-   - Ouvrez et exécutez le notebook `analysis.ipynb` pour charger et visualiser les données de la table `order_details` dans un DataFrame pandas.
+    - Aucune authentification n'est nécessaire.
+
+2. **Exécuter le notebook** :
+    - Ouvrez le fichier `analysis.ipynb` dans Jupyter.
+    - Ce notebook se connecte à la base de données MySQL, récupère les données de la table `order_details`, et les affiche sous forme de DataFrame pandas.
+    - Vous pouvez étendre ce notebook pour effectuer des analyses plus poussées, visualiser les données ou même construire des modèles prédictifs.
 
 ## Conclusion
 
