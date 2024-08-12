@@ -1,4 +1,4 @@
-FROM apache/airflow:2.3.0
+FROM apache/airflow:latest
 
 # Installer les dépendances supplémentaires
 COPY requirements.txt /requirements.txt

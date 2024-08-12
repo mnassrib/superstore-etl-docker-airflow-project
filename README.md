@@ -22,11 +22,11 @@ superstore-etl-docker-airflow-project/
 ├── data/
 │    └── SuperStoreRawData.csv
 ├── jupyter/
-│    └── Dockerfile
-│    └── requirements.txt
+│   ├── Dockerfile
+│   └── requirements.txt
 ├── mysql/
-│    ├── init.sql
-│    └── my.cnf
+│   ├── init.sql
+│   └── my.cnf
 └── notebooks/
     └── analysis.ipynb
 ```
@@ -45,7 +45,7 @@ superstore-etl-docker-airflow-project/
   - **SuperStoreRawData.csv** : Fichier de données brutes à traiter par le pipeline ETL.
 - **jupyter/** :
   - **Dockerfile** : Fichier Docker pour créer une image Jupyter personnalisée capable de se connecter à la base de données MySQL.
-  - **requirements.txt** : Fichier contenant les packages Python nécessaires à Jupyter, comme `mysql-connector-python`, `SQLAlchemy`, ...
+  - **requirements.txt** : Fichier contenant les packages Python nécessaires à Jupyter, comme `mysql-connector-python`, `SQLAlchemy`, etc.
 - **mysql/** :
   - **init.sql** : Script SQL pour initialiser la base de données (non utilisé directement dans le pipeline mais disponible si nécessaire).
   - **my.cnf** : Fichier de configuration MySQL personnalisé.
@@ -59,34 +59,24 @@ Le fichier `docker-compose.yml` est le cœur de l'orchestration de vos services 
 ### Services définis
 
 #### 1. **MySQL**
-   - **Image** : `mysql:5.7`
+   - **Image** : `mysql:latest`
    - **Nom du conteneur** : `mysql`
    - **Configuration** :
-     - Le conteneur utilise MySQL 5.7 et est configuré pour utiliser le plugin `mysql_native_password`.
-     - Les variables d'environnement (`MYSQL_ROOT_PASSWORD`, `MYSQL_DATABASE`, `MYSQL_USER`, `MYSQL_PASSWORD`) sont chargées depuis le fichier `.env`.
+     - Le conteneur utilise la dernière version de MySQL.
+     - Les variables d'environnement (`MYSQL_ROOT_PASSWORD`, `MYSQL_DATABASE`) sont chargées depuis le fichier `.env`.
      - **Volumes** :
        - Les données MySQL sont persistées sur un volume Docker (`mysql_data`) pour garantir que les données restent intactes même après le redémarrage du conteneur.
        - Un fichier de configuration MySQL personnalisé (`my.cnf`) est monté dans le conteneur.
-     - **Healthcheck** : Un test de santé est configuré pour vérifier que MySQL est prêt à accepter des connexions avant que les autres services ne démarrent.
      - **Réseau** : Le conteneur est connecté au réseau `airflow_network`.
 
-#### 2. **MySQL Setup**
-   - **Image** : `mysql:5.7`
-   - **Nom du conteneur** : `mysql-setup`
-   - **Objectif** : Ce conteneur est responsable de l'initialisation de la base de données et de la création de l'utilisateur MySQL.
-   - **Dépendances** :
-     - Ce service dépend de `mysql` et ne s'exécute que lorsque MySQL est prêt.
-   - **Commandes** : Crée la base de données `SUPERSTORE_MYSQL_DATABASE` et configure les privilèges pour l'utilisateur défini dans `.env`.
-   - **Réseau** : Connecté au réseau `airflow_network`.
-
-#### 3. **Adminer**
+#### 2. **Adminer**
    - **Image** : `adminer`
    - **Nom du conteneur** : `adminer`
    - **Ports** : Expose l'interface Adminer sur le port `8081`.
    - **Dépendances** : Dépend de MySQL et ne s'exécute que si MySQL est disponible.
    - **Objectif** : Fournir une interface web pour gérer et interagir avec la base de données MySQL.
 
-#### 4. **Jupyter**
+#### 3. **Jupyter**
    - **Build** : Le conteneur est construit à partir d'un Dockerfile personnalisé dans le répertoire `./jupyter`.
    - **Nom du conteneur** : `jupyter`
    - **Volumes** : Monte les notebooks Jupyter dans le conteneur pour permettre l'accès aux analyses.
@@ -95,16 +85,7 @@ Le fichier `docker-compose.yml` est le cœur de l'orchestration de vos services 
    - **Commandes** : Démarre Jupyter Notebook avec les options appropriées.
    - **Réseau** : Connecté au réseau `airflow_network`.
 
-#### 5. **Airflow Init**
-   - **Image** : `apache/airflow:2.3.0`
-   - **Nom du conteneur** : `airflow-init`
-   - **Objectif** : Initialiser la base de données Airflow et créer l'utilisateur administrateur.
-   - **Commandes** : Exécute la mise à jour de la base de données et crée un utilisateur admin avec les identifiants par défaut.
-   - **Dépendances** :
-     - Dépend du service MySQL pour s'assurer que la base de données est prête avant de démarrer.
-   - **Réseau** : Connecté au réseau `airflow_network`.
-
-#### 6. **Airflow**
+#### 4. **Airflow**
    - **Build** : Le conteneur est construit à partir d'un Dockerfile personnalisé dans le répertoire `./airflow`.
    - **Nom du conteneur** : `airflow`
    - **Configuration** :
@@ -113,7 +94,7 @@ Le fichier `docker-compose.yml` est le cœur de l'orchestration de vos services 
    - **Ports** : Expose l'interface Airflow Web sur le port `8080`.
    - **Commandes** : Démarre le `scheduler` et le `webserver` d'Airflow.
    - **Dépendances** :
-     - Dépend du service `mysql` et `airflow-init` pour s'assurer que MySQL est prêt et que la base de données Airflow est correctement initialisée avant de démarrer.
+     - Dépend du service `mysql` pour s'assurer que MySQL est prêt et que la base de données Airflow est correctement initialisée avant de démarrer.
    - **Réseau** : Connecté au réseau `airflow_network`.
 
 ### Volumes
@@ -129,25 +110,24 @@ Le fichier `docker-compose.yml` est le cœur de l'orchestration de vos services 
 Créez un fichier `.env` à la racine du projet avec le contenu suivant comme exemple :
 
 ```env
-# MySQL environment variables for Airflow
-MYSQL_ROOT_PASSWORD=rootpassword
-MYSQL_DATABASE=airflow_db
+MYSQL_ROOT=root
+MYSQL_ROOT_PASSWORD=root
 MYSQL_HOST=mysql
+MYSQL_DATABASE=airflow_db
 MYSQL_USER=airflow
-MYSQL_USER_PASSWORD=123
-
-# MySQL environment variables for SuperStore
+MYSQL_PASSWORD=123
 SUPERSTORE_MYSQL_DATABASE=superstore
 DATA_FILE_PATH=/data/SuperStoreRawData.csv
 ```
 
 Le fichier `.env` contient des variables d'environnement qui sont utilisées pour configurer les services MySQL et les chemins de fichiers dans votre projet. Voici les variables définies :
 
+- **MYSQL_ROOT** : L'utilisateur root de MySQL.
 - **MYSQL_ROOT_PASSWORD** : Mot de passe pour l'utilisateur root de MySQL.
-- **MYSQL_DATABASE** : Nom de la base de données utilisée par Airflow.
 - **MYSQL_HOST** : Hôte de la base de données MySQL (nom du service dans Docker Compose).
+- **MYSQL_DATABASE** : Nom de la base de données utilisée par Airflow.
 - **MYSQL_USER** : Nom d'utilisateur pour MySQL (utilisé par Airflow et pour l'ETL).
-- **MYSQL_USER_PASSWORD** : Mot de passe pour l'utilisateur MySQL.
+- **MYSQL_PASSWORD** : Mot de passe pour l'utilisateur MySQL.
 - **SUPERSTORE_MYSQL_DATABASE** : Nom de la base de données spécifique pour les données SuperStore.
 - **DATA_FILE_PATH** : Chemin du fichier CSV contenant les données SuperStore, monté dans le conteneur Docker.
 
@@ -172,7 +152,9 @@ La base de données MySQL pour ce projet est structurée selon un schéma relati
   - `product_id` (PRIMARY KEY) : Identifiant unique pour chaque produit.
   - `product_name` : Nom du produit.
   - `category` : Catégorie du produit (par exemple, "Mobilier", "Fournitures de bureau").
-  - `sub_category` : Sous-catégorie du produit (par exemple, "Chaises", "Accessoires de bureau").
+  - `sub
+
+_category` : Sous-catégorie du produit (par exemple, "Chaises", "Accessoires de bureau").
   
 #### 3. **sales_reps** (Représentants des ventes)
 - **Description** : Cette table garde une trace des représentants des ventes et de leurs équipes.
@@ -316,12 +298,36 @@ Pour utiliser le pipeline ETL, suivez ces étapes détaillées :
      ```
      http://localhost:8081
      ```
-   - **Connexion à la base de données** :
-     - Utilisez les informations de connexion définies dans le fichier `.env` :
-       - **Serveur** : `mysql`
-       - **Nom d'utilisateur** : `MYSQL_USER` (par défaut `airflow`)
-       - **Mot de passe** : `MYSQL_USER_PASSWORD` (par défaut `123`)
-       - **Base de données** : `SUPERSTORE_MYSQL_DATABASE` (par défaut `superstore`)
+     
+    - **Connexion à la base de données** :
+
+    Vous pouvez vous connecter à la base de données MySQL de deux manières différentes : en utilisant l'utilisateur `root` (avec `MYSQL_ROOT_PASSWORD`) ou en utilisant un utilisateur standard (avec `MYSQL_USER` et `MYSQL_PASSWORD`).
+
+    - **Option 1 : Connexion avec l'utilisateur root (`MYSQL_ROOT`)**
+
+    Cette méthode utilise l'utilisateur `root` de MySQL, qui a tous les privilèges sur toutes les bases de données.
+
+      - **Serveur** : `mysql`
+      - **Nom d'utilisateur** : `MYSQL_ROOT` (par défaut `root`)
+      - **Mot de passe** : `MYSQL_ROOT_PASSWORD` (par défaut `root`)
+      - **Base de données** : Vous pouvez choisir de ne pas spécifier une base de données particulière pour avoir accès à toutes les bases de données disponibles.
+
+      **Utilisation typique :**
+
+      - Accédez à la base de données en tant que superutilisateur pour gérer toutes les bases de données ou effectuer des tâches administratives avancées.
+
+    - **Option 2 : Connexion avec un utilisateur standard (`MYSQL_USER`)**
+
+    Cette méthode utilise un utilisateur standard avec des privilèges spécifiques à une ou plusieurs bases de données.
+
+      - **Serveur** : `mysql`
+      - **Nom d'utilisateur** : `MYSQL_USER` (par défaut `airflow`)
+      - **Mot de passe** : `MYSQL_PASSWORD` (par défaut `123`)
+      - **Base de données** : Spécifiez la base de données sur laquelle vous souhaitez travailler, par exemple `SUPERSTORE_MYSQL_DATABASE` (par défaut `superstore`).
+
+    **Utilisation typique :**
+
+      - Accédez à une base de données spécifique pour interagir avec les données, exécuter des requêtes, ou effectuer des analyses sans avoir les privilèges superutilisateur complets.
 
    - **Actions disponibles** :
      - **Visualiser les tables** : Vous pouvez voir les tables créées (`customers`, `products`, `orders`, etc.) et explorer leurs contenus.

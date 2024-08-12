@@ -8,3 +8,6 @@ airflow/logs/
 airflow/dags/__pycache__/
 
 notebooks/.ipynb_checkpoints
+
+# Other files
+test.txt
