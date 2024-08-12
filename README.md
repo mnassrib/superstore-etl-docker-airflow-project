@@ -52,6 +52,78 @@ superstore-etl-docker-airflow-project/
 - **notebooks/** :
   - **analysis.ipynb** : Notebook Jupyter pour l'analyse exploratoire des données chargées dans MySQL.
 
+## Comprendre le fichier `docker-compose.yml`
+
+Le fichier `docker-compose.yml` est le cœur de l'orchestration de vos services Docker dans ce projet. Il permet de configurer, de déployer et de gérer les différents conteneurs nécessaires au pipeline ETL. Voici un aperçu détaillé de chaque service et de leur configuration :
+
+### Services définis
+
+#### 1. **MySQL**
+   - **Image** : `mysql:5.7`
+   - **Nom du conteneur** : `mysql`
+   - **Configuration** :
+     - Le conteneur utilise MySQL 5.7 et est configuré pour utiliser le plugin `mysql_native_password`.
+     - Les variables d'environnement (`MYSQL_ROOT_PASSWORD`, `MYSQL_DATABASE`, `MYSQL_USER`, `MYSQL_PASSWORD`) sont chargées depuis le fichier `.env`.
+     - **Volumes** :
+       - Les données MySQL sont persistées sur un volume Docker (`mysql_data`) pour garantir que les données restent intactes même après le redémarrage du conteneur.
+       - Un fichier de configuration MySQL personnalisé (`my.cnf`) est monté dans le conteneur.
+     - **Healthcheck** : Un test de santé est configuré pour vérifier que MySQL est prêt à accepter des connexions avant que les autres services ne démarrent.
+     - **Réseau** : Le conteneur est connecté au réseau `airflow_network`.
+
+#### 2. **MySQL Setup**
+   - **Image** : `mysql:5.7`
+   - **Nom du conteneur** : `mysql-setup`
+   - **Objectif** : Ce conteneur est responsable de l'initialisation de la base de données et de la création de l'utilisateur MySQL.
+   - **Dépendances** :
+     - Ce service dépend de `mysql` et ne s'exécute que lorsque MySQL est prêt.
+   - **Commandes** : Crée la base de données `SUPERSTORE_MYSQL_DATABASE` et configure les privilèges pour l'utilisateur défini dans `.env`.
+   - **Réseau** : Connecté au réseau `airflow_network`.
+
+#### 3. **Adminer**
+   - **Image** : `adminer`
+   - **Nom du conteneur** : `adminer`
+   - **Ports** : Expose l'interface Adminer sur le port `8081`.
+   - **Dépendances** : Dépend de MySQL et ne s'exécute que si MySQL est disponible.
+   - **Objectif** : Fournir une interface web pour gérer et interagir avec la base de données MySQL.
+
+#### 4. **Jupyter**
+   - **Build** : Le conteneur est construit à partir d'un Dockerfile personnalisé dans le répertoire `./jupyter`.
+   - **Nom du conteneur** : `jupyter`
+   - **Volumes** : Monte les notebooks Jupyter dans le conteneur pour permettre l'accès aux analyses.
+   - **Ports** : Expose Jupyter Notebook sur le port `8887`.
+   - **Variables d'environnement** : Paramètres MySQL configurés pour permettre la connexion aux bases de données depuis Jupyter.
+   - **Commandes** : Démarre Jupyter Notebook avec les options appropriées.
+   - **Réseau** : Connecté au réseau `airflow_network`.
+
+#### 5. **Airflow Init**
+   - **Image** : `apache/airflow:2.3.0`
+   - **Nom du conteneur** : `airflow-init`
+   - **Objectif** : Initialiser la base de données Airflow et créer l'utilisateur administrateur.
+   - **Commandes** : Exécute la mise à jour de la base de données et crée un utilisateur admin avec les identifiants par défaut.
+   - **Dépendances** :
+     - Dépend du service MySQL pour s'assurer que la base de données est prête avant de démarrer.
+   - **Réseau** : Connecté au réseau `airflow_network`.
+
+#### 6. **Airflow**
+   - **Build** : Le conteneur est construit à partir d'un Dockerfile personnalisé dans le répertoire `./airflow`.
+   - **Nom du conteneur** : `airflow`
+   - **Configuration** :
+     - Utilise un exécuteur local et se connecte à MySQL pour gérer la base de données Airflow.
+     - Monte les répertoires pour les DAGs, logs, plugins, et les fichiers de données.
+   - **Ports** : Expose l'interface Airflow Web sur le port `8080`.
+   - **Commandes** : Démarre le `scheduler` et le `webserver` d'Airflow.
+   - **Dépendances** :
+     - Dépend du service `mysql` et `airflow-init` pour s'assurer que MySQL est prêt et que la base de données Airflow est correctement initialisée avant de démarrer.
+   - **Réseau** : Connecté au réseau `airflow_network`.
+
+### Volumes
+
+- **mysql_data** : Volume pour le stockage persistant des données MySQL. Cela garantit que les données de votre base de données sont conservées même si le conteneur MySQL est recréé.
+
+### Réseau
+
+- **airflow_network** : Un réseau Docker dédié qui relie tous les services du projet, leur permettant de communiquer entre eux de manière isolée et sécurisée.
+
 ## Fichier `.env`
 
 Créez un fichier `.env` à la racine du projet avec le contenu suivant comme exemple :
@@ -173,40 +245,55 @@ Le pipeline ETL est géré par Apache Airflow et est défini dans le fichier `su
    - Les opérations `INSERT` utilisent la clause `ON DUPLICATE KEY UPDATE` pour s'assurer que les enregistrements existants sont mis à jour sans créer de doublons. Cela garantit que les dernières informations sont correctement enregistrées dans la base de données.
    - Les relations définies par les clés étrangères sont respectées lors de l'insertion des données, assurant ainsi l'intégrité référentielle entre les tables.
 
-### Utilisation du Pipeline ETL
+### Utilisation du pipeline ETL
 
 Pour utiliser le pipeline ETL, suivez ces étapes détaillées :
 
 #### 1. **Cloner le projet**
-   - Commencez par cloner le dépôt du projet sur votre machine locale en utilisant Git :
-     ```bash
-     git clone https://github.com/mnassrib/superstore-etl-docker-airflow-project.git       
-     cd superstore-etl-docker-airflow-project
-     ```
+  - Commencez par cloner le dépôt du projet sur votre machine locale en utilisant Git :
+    ```bash
+    git clone https://github.com/mnassrib/superstore-etl-docker-airflow-project.git       
+    cd superstore-etl-docker-airflow-project
+    ```
 
 #### 2. **Configurer les variables d'environnement**
-   - Assurez-vous que le fichier `.env` est correctement configuré avec vos paramètres de base de données et autres variables d'environnement. Ce fichier définit les mots de passe MySQL, les noms de bases de données, et les chemins des fichiers nécessaires au bon fonctionnement des services.
+  - Assurez-vous que le fichier `.env` est correctement configuré avec vos paramètres de base de données et autres variables d'environnement. Ce fichier définit les mots de passe MySQL, les noms de bases de données, et les chemins des fichiers nécessaires au bon fonctionnement des services.
 
 #### 3. **Démarrer les services avec Docker Compose**
-   - Ouvrez un terminal dans le répertoire du projet cloné.
-   - Pour démarrer tous les services (MySQL, Airflow, Jupyter, Adminer), exécutez la commande suivante :
-     ```bash
-     docker-compose up -d
-     ```
-   - L'option `-d` lance les conteneurs en arrière-plan. Si vous souhaitez voir les logs en temps réel, vous pouvez omettre `-d`.
+  - Ouvrez un terminal dans le répertoire du projet cloné.
+  - Pour démarrer tous les services (MySQL, Airflow, Jupyter, Adminer), exécutez la commande suivante :
+    ```bash
+    docker-compose up -d
+    ```
+  - L'option `-d` lance les conteneurs en arrière-plan. Si vous souhaitez voir les logs en temps réel, vous pouvez omettre `-d`.
 
-   - **Vérifier les services** :
-     - Vous pouvez vérifier si les services fonctionnent correctement en utilisant :
-       ```bash
-       docker-compose ps
-       ```
-     - Cette commande vous montrera l'état de chaque conteneur.
+  - **Vérifier les services** :
+    - Vous pouvez vérifier si les services fonctionnent correctement en utilisant :
+      ```bash
+      docker-compose ps
+      ```
+    - Cette commande vous montrera l'état de chaque conteneur.
 
-   - **Arrêter les services** :
-     - Pour arrêter tous les services, utilisez :
+  - **Voir les logs** :
+    - Pour afficher les logs d'un service particulier (par exemple, Airflow) :
+      ```bash
+      docker-compose logs airflow
+      ```
+    - Pour suivre les logs en temps réel :
+      ```bash
+      docker-compose logs -f airflow
+      ```
+
+  - **Arrêter les services** :
+    - Pour arrêter tous les services, utilisez :
        ```bash
        docker-compose down
        ```
+  - **Relancer un service individuellement** :
+    - Si vous souhaitez relancer un seul service (par exemple, Jupyter) sans toucher aux autres :
+    ```bash
+    docker-compose up -d jupyter
+    ``` 
 
 #### 4. **Accéder à l'interface web d'Airflow**
    - Airflow est l'outil principal pour gérer et visualiser le pipeline ETL. Pour y accéder, ouvrez votre navigateur et allez à l'adresse suivante :
