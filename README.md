@@ -301,33 +301,33 @@ Pour utiliser le pipeline ETL, suivez ces étapes détaillées :
 
     - **Connexion à la base de données** :
 
-    Vous pouvez vous connecter à la base de données MySQL de deux manières différentes : en utilisant l'utilisateur `root` (avec `MYSQL_ROOT_PASSWORD`) ou en utilisant un utilisateur standard (avec `MYSQL_USER` et `MYSQL_PASSWORD`).
+      Vous pouvez vous connecter à la base de données MySQL de deux manières différentes : en utilisant l'utilisateur `root` (avec `MYSQL_ROOT_PASSWORD`) ou en utilisant un utilisateur standard (avec `MYSQL_USER` et `MYSQL_PASSWORD`).
 
-    - **Option 1 : Connexion avec l'utilisateur root (`MYSQL_ROOT`)**
+      - **Option 1 : Connexion avec l'utilisateur root (`MYSQL_ROOT`)**
 
-    Cette méthode utilise l'utilisateur `root` de MySQL, qui a tous les privilèges sur toutes les bases de données.
+      Cette méthode utilise l'utilisateur `root` de MySQL, qui a tous les privilèges sur toutes les bases de données.
 
-      - **Serveur** : `mysql`
-      - **Nom d'utilisateur** : `MYSQL_ROOT` (par défaut `root`)
-      - **Mot de passe** : `MYSQL_ROOT_PASSWORD` (par défaut `root`)
-      - **Base de données** : Vous pouvez choisir de ne pas spécifier une base de données particulière pour avoir accès à toutes les bases de données disponibles.
+        - **Serveur** : `mysql`
+        - **Nom d'utilisateur** : `MYSQL_ROOT` (par défaut `root`)
+        - **Mot de passe** : `MYSQL_ROOT_PASSWORD` (par défaut `root`)
+        - **Base de données** : Vous pouvez choisir de ne pas spécifier une base de données particulière pour avoir accès à toutes les bases de données disponibles.
+
+        **Utilisation typique :**
+
+        - Accédez à la base de données en tant que superutilisateur pour gérer toutes les bases de données ou effectuer des tâches administratives avancées.
+
+      - **Option 2 : Connexion avec un utilisateur standard (`MYSQL_USER`)**
+
+      Cette méthode utilise un utilisateur standard avec des privilèges spécifiques à une ou plusieurs bases de données.
+
+        - **Serveur** : `mysql`
+        - **Nom d'utilisateur** : `MYSQL_USER` (par défaut `airflow`)
+        - **Mot de passe** : `MYSQL_PASSWORD` (par défaut `123`)
+        - **Base de données** : Spécifiez la base de données sur laquelle vous souhaitez travailler, par exemple `SUPERSTORE_MYSQL_DATABASE` (par défaut `superstore`).
 
       **Utilisation typique :**
 
-      - Accédez à la base de données en tant que superutilisateur pour gérer toutes les bases de données ou effectuer des tâches administratives avancées.
-
-    - **Option 2 : Connexion avec un utilisateur standard (`MYSQL_USER`)**
-
-    Cette méthode utilise un utilisateur standard avec des privilèges spécifiques à une ou plusieurs bases de données.
-
-      - **Serveur** : `mysql`
-      - **Nom d'utilisateur** : `MYSQL_USER` (par défaut `airflow`)
-      - **Mot de passe** : `MYSQL_PASSWORD` (par défaut `123`)
-      - **Base de données** : Spécifiez la base de données sur laquelle vous souhaitez travailler, par exemple `SUPERSTORE_MYSQL_DATABASE` (par défaut `superstore`).
-
-    **Utilisation typique :**
-
-      - Accédez à une base de données spécifique pour interagir avec les données, exécuter des requêtes, ou effectuer des analyses sans avoir les privilèges superutilisateur complets.
+        - Accédez à une base de données spécifique pour interagir avec les données, exécuter des requêtes, ou effectuer des analyses sans avoir les privilèges superutilisateur complets.
 
     - **Actions disponibles** :
       - **Visualiser les tables** : Vous pouvez voir les tables créées (`customers`, `products`, `orders`, etc.) et explorer leurs contenus.
