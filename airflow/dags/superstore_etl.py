@@ -42,7 +42,7 @@ def create_tables(**kwargs):
         connection = mysql.connector.connect(
             host=os.getenv('MYSQL_HOST'),
             user=os.getenv('MYSQL_USER'),
-            password=os.getenv('MYSQL_PASSWORD'),
+            password=os.getenv('MYSQL_USER_PASSWORD'),
             database=os.getenv('SUPERSTORE_MYSQL_DATABASE')
         )
         if connection.is_connected():
@@ -185,7 +185,7 @@ def load():
     conn = mysql.connector.connect(
         host=os.getenv('MYSQL_HOST'),
         user=os.getenv('MYSQL_USER'),
-        password=os.getenv('MYSQL_PASSWORD'),
+        password=os.getenv('MYSQL_USER_PASSWORD'),
         database=os.getenv('SUPERSTORE_MYSQL_DATABASE')
     )
     

@@ -7,7 +7,7 @@ services:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_DATABASE: ${MYSQL_DATABASE}
       MYSQL_USER: ${MYSQL_USER}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_USER_PASSWORD: ${MYSQL_USER_PASSWORD}
     volumes:
       - mysql_data:/var/lib/mysql
       - ./mysql/my.cnf:/etc/mysql/my.cnf  # Monte le fichier my.cnf
@@ -26,7 +26,7 @@ services:
         bash -c "
         mysql -h mysql -u root -p${MYSQL_ROOT_PASSWORD} -e \"
           CREATE DATABASE IF NOT EXISTS ${SUPERSTORE_MYSQL_DATABASE};
-          CREATE USER IF NOT EXISTS '${MYSQL_USER}'@'%' IDENTIFIED BY '${MYSQL_PASSWORD}';
+          CREATE USER IF NOT EXISTS '${MYSQL_USER}'@'%' IDENTIFIED BY '${MYSQL_USER_PASSWORD}';
           GRANT ALL PRIVILEGES ON ${SUPERSTORE_MYSQL_DATABASE}.* TO '${MYSQL_USER}'@'%';
           FLUSH PRIVILEGES;\"
         "
@@ -34,7 +34,7 @@ services:
         MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
         SUPERSTORE_MYSQL_DATABASE: ${SUPERSTORE_MYSQL_DATABASE}
         MYSQL_USER: ${MYSQL_USER}
-        MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+        MYSQL_USER_PASSWORD: ${MYSQL_USER_PASSWORD}
       networks:
         - airflow_network
       depends_on:
@@ -66,7 +66,7 @@ services:
       MYSQL_HOST: ${MYSQL_HOST}
       SUPERSTORE_MYSQL_DATABASE: ${SUPERSTORE_MYSQL_DATABASE}
       MYSQL_USER: ${MYSQL_USER}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_USER_PASSWORD: ${MYSQL_USER_PASSWORD}
       JUPYTER_ENABLE_LAB: "yes"
     command: start-notebook.sh --NotebookApp.token=''
     depends_on:
@@ -80,7 +80,7 @@ services:
     container_name: airflow-init
     environment:
       AIRFLOW__CORE__EXECUTOR: LocalExecutor
-      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: mysql://${MYSQL_USER}:${MYSQL_PASSWORD}@mysql:3306/${MYSQL_DATABASE}
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: mysql://${MYSQL_USER}:${MYSQL_USER_PASSWORD}@mysql:3306/${MYSQL_DATABASE}
       AIRFLOW__CORE__LOAD_EXAMPLES: 'False'
     entrypoint: /bin/bash
     command: -c "sleep 30 && airflow db upgrade && airflow users create --username admin --password admin --firstname Air --lastname Flow --role Admin --email admin@example.com"
@@ -97,11 +97,11 @@ services:
     container_name: airflow
     environment:
       AIRFLOW__CORE__EXECUTOR: LocalExecutor
-      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: mysql://${MYSQL_USER}:${MYSQL_PASSWORD}@mysql:3306/${MYSQL_DATABASE}
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: mysql://${MYSQL_USER}:${MYSQL_USER_PASSWORD}@mysql:3306/${MYSQL_DATABASE}
       AIRFLOW__CORE__LOAD_EXAMPLES: 'False'
       MYSQL_HOST: ${MYSQL_HOST}
       MYSQL_USER: ${MYSQL_USER}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_USER_PASSWORD: ${MYSQL_USER_PASSWORD}
       MYSQL_DATABASE: ${MYSQL_DATABASE}
       SUPERSTORE_MYSQL_DATABASE: ${SUPERSTORE_MYSQL_DATABASE}
       DATA_FILE_PATH: ${DATA_FILE_PATH}

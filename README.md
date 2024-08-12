@@ -62,7 +62,7 @@ MYSQL_ROOT_PASSWORD=rootpassword
 MYSQL_DATABASE=airflow_db
 MYSQL_HOST=mysql
 MYSQL_USER=airflow
-MYSQL_PASSWORD=123
+MYSQL_USER_PASSWORD=123
 
 # MySQL environment variables for SuperStore
 SUPERSTORE_MYSQL_DATABASE=superstore
@@ -75,7 +75,7 @@ Le fichier `.env` contient des variables d'environnement qui sont utilisées pou
 - **MYSQL_DATABASE** : Nom de la base de données utilisée par Airflow.
 - **MYSQL_HOST** : Hôte de la base de données MySQL (nom du service dans Docker Compose).
 - **MYSQL_USER** : Nom d'utilisateur pour MySQL (utilisé par Airflow et pour l'ETL).
-- **MYSQL_PASSWORD** : Mot de passe pour l'utilisateur MySQL.
+- **MYSQL_USER_PASSWORD** : Mot de passe pour l'utilisateur MySQL.
 - **SUPERSTORE_MYSQL_DATABASE** : Nom de la base de données spécifique pour les données SuperStore.
 - **DATA_FILE_PATH** : Chemin du fichier CSV contenant les données SuperStore, monté dans le conteneur Docker.
 
@@ -233,7 +233,7 @@ Pour utiliser le pipeline ETL, suivez ces étapes détaillées :
      - Utilisez les informations de connexion définies dans le fichier `.env` :
        - **Serveur** : `mysql`
        - **Nom d'utilisateur** : `MYSQL_USER` (par défaut `airflow`)
-       - **Mot de passe** : `MYSQL_PASSWORD` (par défaut `123`)
+       - **Mot de passe** : `MYSQL_USER_PASSWORD` (par défaut `123`)
        - **Base de données** : `SUPERSTORE_MYSQL_DATABASE` (par défaut `superstore`)
 
    - **Actions disponibles** :
