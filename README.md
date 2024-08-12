@@ -305,7 +305,7 @@ Pour utiliser le pipeline ETL, suivez ces étapes détaillées :
 
     - **Option 1 : Connexion avec l'utilisateur root (`MYSQL_ROOT`)**
 
-    Cette méthode utilise l'utilisateur `root` de MySQL, qui a tous les privilèges sur toutes les bases de données.
+      Cette méthode utilise l'utilisateur `root` de MySQL, qui a tous les privilèges sur toutes les bases de données.
 
       - **Serveur** : `mysql`
       - **Nom d'utilisateur** : `MYSQL_ROOT` (par défaut `root`)
@@ -318,7 +318,7 @@ Pour utiliser le pipeline ETL, suivez ces étapes détaillées :
 
     - **Option 2 : Connexion avec un utilisateur standard (`MYSQL_USER`)**
 
-    Cette méthode utilise un utilisateur standard avec des privilèges spécifiques à une ou plusieurs bases de données.
+      Cette méthode utilise un utilisateur standard avec des privilèges spécifiques à une ou plusieurs bases de données.
 
       - **Serveur** : `mysql`
       - **Nom d'utilisateur** : `MYSQL_USER` (par défaut `airflow`)
