@@ -298,7 +298,7 @@ Pour utiliser le pipeline ETL, suivez ces étapes détaillées :
      ```
      http://localhost:8081
      ```
-     
+
     - **Connexion à la base de données** :
 
     Vous pouvez vous connecter à la base de données MySQL de deux manières différentes : en utilisant l'utilisateur `root` (avec `MYSQL_ROOT_PASSWORD`) ou en utilisant un utilisateur standard (avec `MYSQL_USER` et `MYSQL_PASSWORD`).
@@ -329,9 +329,9 @@ Pour utiliser le pipeline ETL, suivez ces étapes détaillées :
 
       - Accédez à une base de données spécifique pour interagir avec les données, exécuter des requêtes, ou effectuer des analyses sans avoir les privilèges superutilisateur complets.
 
-   - **Actions disponibles** :
-     - **Visualiser les tables** : Vous pouvez voir les tables créées (`customers`, `products`, `orders`, etc.) et explorer leurs contenus.
-     - **Exécuter des requêtes SQL** : Exécutez des requêtes personnalisées pour extraire des données spécifiques ou pour manipuler la base de données directement.
+    - **Actions disponibles** :
+      - **Visualiser les tables** : Vous pouvez voir les tables créées (`customers`, `products`, `orders`, etc.) et explorer leurs contenus.
+      - **Exécuter des requêtes SQL** : Exécutez des requêtes personnalisées pour extraire des données spécifiques ou pour manipuler la base de données directement.
 
 ## Analyse des données avec Jupyter
 
