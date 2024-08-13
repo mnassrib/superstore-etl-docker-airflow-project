@@ -38,7 +38,7 @@ def create_database_and_user(**kwargs):
     try:
         with mysql.connector.connect(
             host=os.getenv('MYSQL_HOST'),
-            user=os.getenv('MYSQL_ROOT'),
+            user=os.getenv('MYSQL_ROOT', 'root'),
             password=os.getenv('MYSQL_ROOT_PASSWORD'),
             database=os.getenv('MYSQL_DATABASE')
         ) as connection:

@@ -111,7 +111,6 @@ Le fichier `docker-compose.yml` est le cœur de l'orchestration de vos services 
 Créez un fichier `.env` à la racine du projet avec le contenu suivant comme exemple :
 
 ```env
-MYSQL_ROOT=root
 MYSQL_ROOT_PASSWORD=root
 MYSQL_HOST=mysql
 MYSQL_DATABASE=airflow_db
@@ -123,7 +122,6 @@ DATA_FILE_PATH=/data/SuperStoreRawData.csv
 
 Le fichier `.env` contient des variables d'environnement qui sont utilisées pour configurer les services MySQL et les chemins de fichiers dans votre projet. Voici les variables définies :
 
-- **MYSQL_ROOT** : L'utilisateur root de MySQL.
 - **MYSQL_ROOT_PASSWORD** : Mot de passe pour l'utilisateur root de MySQL.
 - **MYSQL_HOST** : Hôte de la base de données MySQL (nom du service dans Docker Compose).
 - **MYSQL_DATABASE** : Nom de la base de données utilisée par Airflow.
@@ -304,12 +302,12 @@ Pour utiliser le pipeline ETL, suivez ces étapes détaillées :
 
       Vous pouvez vous connecter à la base de données MySQL de deux manières différentes : en utilisant l'utilisateur `root` (avec `MYSQL_ROOT_PASSWORD`) ou en utilisant un utilisateur standard (avec `MYSQL_USER` et `MYSQL_PASSWORD`).
 
-    - **Option 1 : Connexion avec l'utilisateur root (`MYSQL_ROOT`)**
+    - **Option 1 : Connexion avec l'utilisateur root**
 
       Cette méthode utilise l'utilisateur `root` de MySQL, qui a tous les privilèges sur toutes les bases de données.
 
       - **Serveur** : `mysql`
-      - **Nom d'utilisateur** : `MYSQL_ROOT` (par défaut `root`)
+      - **Nom d'utilisateur** : `root`
       - **Mot de passe** : `MYSQL_ROOT_PASSWORD` (par défaut `root`)
       - **Base de données** : Vous pouvez choisir de ne pas spécifier une base de données particulière pour avoir accès à toutes les bases de données disponibles.
 
