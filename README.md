@@ -83,6 +83,7 @@ Le fichier `docker-compose.yml` est le cœur de l'orchestration de vos services 
    - **Ports** : Expose Jupyter Notebook sur le port `8887`.
    - **Variables d'environnement** : Paramètres MySQL configurés pour permettre la connexion aux bases de données depuis Jupyter.
    - **Commandes** : Démarre Jupyter Notebook avec les options appropriées.
+   - **Dépendances** : Dépend du service `mysql` pour s'assurer que MySQL est prêt.
    - **Réseau** : Connecté au réseau `airflow_network`.
 
 #### 4. **Airflow**
