@@ -45,7 +45,7 @@ superstore-etl-docker-airflow-project/
   - **SuperStoreRawData.csv** : Fichier de données brutes à traiter par le pipeline ETL.
 - **jupyter/** :
   - **Dockerfile** : Fichier Docker pour créer une image Jupyter personnalisée capable de se connecter à la base de données MySQL.
-  - **requirements.txt** : Fichier contenant les packages Python nécessaires à Jupyter, comme `mysql-connector-python`, `SQLAlchemy`, etc.
+  - **requirements.txt** : Fichier contenant les packages Python nécessaires à Jupyter, comme `mysql-connector-python`, `pandas`, `SQLAlchemy` et `PyMySQL`.
 - **mysql/** :
   - **init.sql** : Script SQL pour initialiser la base de données (non utilisé directement dans le pipeline mais disponible si nécessaire).
   - **my.cnf** : Fichier de configuration MySQL personnalisé.
