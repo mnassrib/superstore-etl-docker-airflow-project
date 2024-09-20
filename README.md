@@ -151,9 +151,7 @@ La base de données MySQL pour ce projet est structurée selon un schéma relati
   - `product_id` (PRIMARY KEY) : Identifiant unique pour chaque produit.
   - `product_name` : Nom du produit.
   - `category` : Catégorie du produit (par exemple, "Mobilier", "Fournitures de bureau").
-  - `sub
-
-_category` : Sous-catégorie du produit (par exemple, "Chaises", "Accessoires de bureau").
+  - `sub_category` : Sous-catégorie du produit (par exemple, "Chaises", "Accessoires de bureau").
   
 #### 3. **sales_reps** (Représentants des ventes)
 - **Description** : Cette table garde une trace des représentants des ventes et de leurs équipes.

@@ -142,7 +142,7 @@ def transform(**kwargs):
     df = df.dropna()
     # 2. Supprimer les duplicata
     df = df.drop_duplicates()
-    # 2. Supprimer les duplicata
+    # 2. Supprimer les outliers
     Q1 = df['sales'].quantile(0.25)
     Q3 = df['sales'].quantile(0.75)
     IQR = Q3 - Q1
